@@ -14,8 +14,25 @@ procedure CloseProcessPID(pid: Integer);
 function KillTask(ExeFileName: string): Integer;
 function GetTask(): ListTProcessEntry32;
 function GetPathFromPID(const PID: cardinal): string;
+function FindProcess(process:TProcessEntry32;list:ListTProcessEntry32):Boolean;
 
 implementation
+
+
+function FindProcess(process:TProcessEntry32;list:ListTProcessEntry32):Boolean;
+var
+  i: integer;
+begin
+  for i := 0 to Length(list) - 1 do
+  begin
+    if (list[i].szExeFile = process.szExeFile) and (list[i].th32ProcessID = process.th32ProcessID) then
+    begin
+      result := true;
+      exit;
+    end;
+  end;
+  result := false;
+end;
 
 
 function GetPathFromPID(const PID: cardinal): string;

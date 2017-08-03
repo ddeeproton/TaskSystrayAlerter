@@ -7,7 +7,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  Menus, TaskClass;
+  Menus, TaskClass, Tlhelp32;
 
 
 type
@@ -24,7 +24,6 @@ type
     procedure DisplayMessage(title: string; msg: string);
     procedure FormShow(Sender: TObject);
     procedure MenuItem1Click(Sender: TObject);
-    procedure TimerAfterLoadTimer(Sender: TObject);
     procedure TimerCheckNewProcessTimer(Sender: TObject);
   private
     { private declarations }
@@ -45,28 +44,17 @@ implementation
 { TForm1 }
 
 
-
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   oldTask := TaskClass.GetTask();
 end;
 
 
-
-function findProcess(search:string;id:integer;list:ListTProcessEntry32):Boolean;
-var
-  i: integer;
+procedure TForm1.FormShow(Sender: TObject);
 begin
-  for i := 0 to Length(list) - 1 do
-  begin
-    if (list[i].szExeFile = search) and (list[i].th32ProcessID = id) then
-    begin
-      result := true;
-      exit;
-    end;
-  end;
-  result := false;
+  Hide;
 end;
+
 
 procedure TForm1.CheckNewProcess();
 var
@@ -76,8 +64,8 @@ begin
   processList := TaskClass.GetTask();
   for i := 0 to Length(processList) - 1 do
   begin
-    if not findProcess(processList[i].szExeFile, processList[i].th32ProcessID, oldTask) then
-       DisplayMessage(processList[i].szExeFile, GetPathFromPID(processList[i].th32ProcessID));
+    if not TaskClass.FindProcess(processList[i], oldTask) then
+       DisplayMessage(processList[i].szExeFile, 'PID: '+IntToStr(processList[i].th32ProcessID)+#13#10+GetPathFromPID(processList[i].th32ProcessID));
   end;
   oldTask := processList;
 end;
@@ -90,29 +78,17 @@ begin
   TrayIcon1.ShowBalloonHint;
 end;
 
-procedure TForm1.FormShow(Sender: TObject);
-begin
-  Hide;
-end;
-
 
 procedure TForm1.MenuItem1Click(Sender: TObject);
 begin
   Application.Terminate;
 end;
 
-procedure TForm1.TimerAfterLoadTimer(Sender: TObject);
-begin
-  TimerAfterLoad.Enabled:=False;
-  Hide;
-end;
 
 procedure TForm1.TimerCheckNewProcessTimer(Sender: TObject);
 begin
   CheckNewProcess();
 end;
-
-
 
 
 end.
