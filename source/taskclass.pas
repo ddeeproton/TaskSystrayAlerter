@@ -5,7 +5,7 @@ unit TaskClass;
 interface
 
 uses
-  Classes, SysUtils, Tlhelp32, Windows;
+  Classes, SysUtils, Tlhelp32, Windows, PsAPI;
 
 type
   ListTProcessEntry32 = Array of TProcessEntry32;
@@ -13,8 +13,28 @@ type
 procedure CloseProcessPID(pid: Integer);
 function KillTask(ExeFileName: string): Integer;
 function GetTask(): ListTProcessEntry32;
+function GetPathFromPID(const PID: cardinal): string;
 
 implementation
+
+
+function GetPathFromPID(const PID: cardinal): string;
+var
+  hProcess: THandle;
+  path: array[0..MAX_PATH - 1] of char;
+begin
+  hProcess := OpenProcess(PROCESS_QUERY_INFORMATION or PROCESS_VM_READ, false, PID);
+  if hProcess <> 0 then
+    try
+      if GetModuleFileNameEx(hProcess, 0, path, MAX_PATH) = 0 then
+        RaiseLastOSError;
+      result := path;
+    finally
+      CloseHandle(hProcess)
+    end
+  else
+    RaiseLastOSError;
+end;
 
 
 procedure CloseProcessPID(pid: Integer);

@@ -7,7 +7,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  Menus, TaskClass, unitAlert;
+  Menus, TaskClass;
 
 
 type
@@ -17,17 +17,15 @@ type
   TForm1 = class(TForm)
     MenuItem1: TMenuItem;
     PopupMenu1: TPopupMenu;
-    TimerAfterLoad: TTimer;
     TimerCheckNewProcess: TTimer;
-    TimerHideMessage: TTimer;
     TrayIcon1: TTrayIcon;
     procedure CheckNewProcess();
     procedure FormCreate(Sender: TObject);
-    procedure DisplayMessage(msg: string);
+    procedure DisplayMessage(title: string; msg: string);
+    procedure FormShow(Sender: TObject);
     procedure MenuItem1Click(Sender: TObject);
     procedure TimerAfterLoadTimer(Sender: TObject);
     procedure TimerCheckNewProcessTimer(Sender: TObject);
-    procedure TimerHideMessageTimer(Sender: TObject);
   private
     { private declarations }
   public
@@ -38,7 +36,6 @@ type
 
 var
   Form1: TForm1;
-  FormAlert: TFormAlert;
   oldTask: ListTProcessEntry32;
 
 implementation
@@ -56,13 +53,13 @@ end;
 
 
 
-function findProcess(search:string;list:ListTProcessEntry32):Boolean;
+function findProcess(search:string;id:integer;list:ListTProcessEntry32):Boolean;
 var
   i: integer;
 begin
   for i := 0 to Length(list) - 1 do
   begin
-    if list[i].szExeFile = search then
+    if (list[i].szExeFile = search) and (list[i].th32ProcessID = id) then
     begin
       result := true;
       exit;
@@ -73,27 +70,29 @@ end;
 
 procedure TForm1.CheckNewProcess();
 var
-  ts: ListTProcessEntry32;
+  processList: ListTProcessEntry32;
   i: integer;
 begin
-  ts := TaskClass.GetTask();
-  for i := 0 to Length(ts) - 1 do
+  processList := TaskClass.GetTask();
+  for i := 0 to Length(processList) - 1 do
   begin
-    if not findProcess(ts[i].szExeFile, oldTask) then
-       DisplayMessage(ts[i].szExeFile);
+    if not findProcess(processList[i].szExeFile, processList[i].th32ProcessID, oldTask) then
+       DisplayMessage(processList[i].szExeFile, GetPathFromPID(processList[i].th32ProcessID));
   end;
-  oldTask := ts;
+  oldTask := processList;
 end;
 
 
-procedure TForm1.DisplayMessage(msg: string);
+procedure TForm1.DisplayMessage(title: string; msg: string);
 begin
-  TimerHideMessage.Enabled := False;
-  if FormAlert = nil then FormAlert := TFormAlert.Create(nil);
-  FormAlert.Label1.Caption := PChar(msg);
-  FormAlert.Show;
-  FormAlert.FormCreate(nil);
-  TimerHideMessage.Enabled := True;
+  TrayIcon1.BalloonTitle:= title;
+  TrayIcon1.BalloonHint:= msg;
+  TrayIcon1.ShowBalloonHint;
+end;
+
+procedure TForm1.FormShow(Sender: TObject);
+begin
+  Hide;
 end;
 
 
@@ -111,12 +110,6 @@ end;
 procedure TForm1.TimerCheckNewProcessTimer(Sender: TObject);
 begin
   CheckNewProcess();
-end;
-
-procedure TForm1.TimerHideMessageTimer(Sender: TObject);
-begin
-  FormAlert.Hide;
-  TimerHideMessage.Enabled := False;
 end;
 
 

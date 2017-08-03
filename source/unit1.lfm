@@ -1,38 +1,27 @@
 object Form1: TForm1
   Left = 232
-  Height = 295
+  Height = 200
   Top = 113
   Width = 182
   Caption = 'Form1'
   OnCreate = FormCreate
+  OnShow = FormShow
   LCLVersion = '1.6.4.0'
-  object TimerHideMessage: TTimer
-    Enabled = False
-    Interval = 10000
-    OnTimer = TimerHideMessageTimer
-    left = 72
-    top = 120
-  end
   object TimerCheckNewProcess: TTimer
     OnTimer = TimerCheckNewProcessTimer
     left = 72
-    top = 64
-  end
-  object TimerAfterLoad: TTimer
-    Interval = 1
-    OnTimer = TimerAfterLoadTimer
-    left = 72
-    top = 8
+    top = 16
   end
   object PopupMenu1: TPopupMenu
     left = 72
-    top = 176
+    top = 80
     object MenuItem1: TMenuItem
       Caption = 'Quit'
       OnClick = MenuItem1Click
     end
   end
   object TrayIcon1: TTrayIcon
+    BalloonTimeout = 10000
     PopUpMenu = PopupMenu1
     Icon.Data = {
       3E01000000000100010010101000010004002801000016000000280000001000
@@ -47,9 +36,9 @@ object Form1: TForm1
       080180013A008001120180013A00800100008001000080010000C0030000E003
       0000
     }
-    Hint = 'Task Systray Alerter 0.2'
+    Hint = 'Task Systray Alerter 0.3'
     Visible = True
     left = 72
-    top = 232
+    top = 136
   end
 end
