@@ -8,11 +8,11 @@ uses
   Classes, SysUtils, Tlhelp32, Windows;
 
 type
-  TaskData = Array [0..1] of TStringList;
+  ListTProcessEntry32 = Array of TProcessEntry32;
 
 procedure CloseProcessPID(pid: Integer);
 function KillTask(ExeFileName: string): Integer;
-function GetTask(): TaskData;
+function GetTask(): ListTProcessEntry32;
 
 implementation
 
@@ -76,25 +76,25 @@ end;
 
 
 
-function GetTask(): TaskData;
+
+function GetTask(): ListTProcessEntry32;
 const
   PROCESS_TERMINATE = $0001;
 var
   ContinueLoop: BOOL;
   FSnapshotHandle: THandle;
   FProcessEntry32: TProcessEntry32;
-  ListOfProcess : TaskData;
+  ListOfProcess : ListTProcessEntry32;
 begin
-  ListOfProcess[0] := TStringList.Create;
-  ListOfProcess[1] := TStringList.Create;
+  SetLength(ListOfProcess, 0);
   try
     FSnapshotHandle := CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     FProcessEntry32.dwSize := SizeOf(FProcessEntry32);
     ContinueLoop := Process32First(FSnapshotHandle, FProcessEntry32);
     while Integer(ContinueLoop) <> 0 do
     begin
-      ListOfProcess[0].Add(FProcessEntry32.szExeFile);
-      ListOfProcess[1].Add(IntToStr(FProcessEntry32.th32ProcessID));
+      SetLength(ListOfProcess, Length(ListOfProcess)+1);
+      ListOfProcess[Length(ListOfProcess)-1] := FProcessEntry32;
       ContinueLoop := Process32Next(FSnapshotHandle, FProcessEntry32);
     end;
 

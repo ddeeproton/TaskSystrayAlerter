@@ -1,7 +1,7 @@
 object FormAlert: TFormAlert
-  Left = 242
+  Left = 239
   Height = 18
-  Top = 405
+  Top = 439
   Width = 137
   BorderStyle = bsNone
   Caption = 'Alert'
