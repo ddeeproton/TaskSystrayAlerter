@@ -12,7 +12,7 @@ type
 
 procedure CloseProcessPID(pid: Integer);
 function KillTask(ExeFileName: string): Integer;
-function GetTask(): ListTProcessEntry32;
+function GetListTProcessEntry32(): ListTProcessEntry32;
 function GetPathFromPID(const PID: cardinal): string;
 function FindProcess(process:TProcessEntry32;list:ListTProcessEntry32):Boolean;
 
@@ -49,8 +49,8 @@ begin
     finally
       CloseHandle(hProcess)
     end
-  else
-    RaiseLastOSError;
+  //else
+  //  RaiseLastOSError;
 end;
 
 
@@ -114,9 +114,7 @@ end;
 
 
 
-function GetTask(): ListTProcessEntry32;
-const
-  PROCESS_TERMINATE = $0001;
+function GetListTProcessEntry32(): ListTProcessEntry32;
 var
   ContinueLoop: BOOL;
   FSnapshotHandle: THandle;
@@ -134,7 +132,6 @@ begin
       ListOfProcess[Length(ListOfProcess)-1] := FProcessEntry32;
       ContinueLoop := Process32Next(FSnapshotHandle, FProcessEntry32);
     end;
-
     CloseHandle(FSnapshotHandle);
   except
     On E : EOSError do

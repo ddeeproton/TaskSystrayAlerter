@@ -6,7 +6,7 @@ unit Unit1;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls,
   Menus, TaskClass, Tlhelp32;
 
 
@@ -46,7 +46,7 @@ implementation
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-  oldTask := TaskClass.GetTask();
+  oldTask := TaskClass.GetListTProcessEntry32();
 end;
 
 
@@ -61,11 +61,25 @@ var
   processList: ListTProcessEntry32;
   i: integer;
 begin
-  processList := TaskClass.GetTask();
+  processList := TaskClass.GetListTProcessEntry32();
+  for i := 0 to Length(oldTask) - 1 do
+  begin
+    if not TaskClass.FindProcess(oldTask[i], processList) then
+       DisplayMessage(
+                      oldTask[i].szExeFile,
+                      'Status: closed'+#13#10
+                      +'PID: '+IntToStr(oldTask[i].th32ProcessID)
+                      );
+  end;
   for i := 0 to Length(processList) - 1 do
   begin
     if not TaskClass.FindProcess(processList[i], oldTask) then
-       DisplayMessage(processList[i].szExeFile, 'PID: '+IntToStr(processList[i].th32ProcessID)+#13#10+GetPathFromPID(processList[i].th32ProcessID));
+       DisplayMessage(
+                      processList[i].szExeFile,
+                      'Status: running'+#13#10
+                      +'PID: '+IntToStr(processList[i].th32ProcessID)+#13#10
+                      +GetPathFromPID(processList[i].th32ProcessID)
+                      );
   end;
   oldTask := processList;
 end;
@@ -76,6 +90,8 @@ begin
   TrayIcon1.BalloonTitle:= title;
   TrayIcon1.BalloonHint:= msg;
   TrayIcon1.ShowBalloonHint;
+  Application.ProcessMessages;
+  Sleep(100);
 end;
 
 
