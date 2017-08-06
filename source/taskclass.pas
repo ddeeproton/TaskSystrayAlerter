@@ -40,15 +40,20 @@ var
   hProcess: THandle;
   path: array[0..MAX_PATH - 1] of char;
 begin
-  hProcess := OpenProcess(PROCESS_QUERY_INFORMATION or PROCESS_VM_READ, false, PID);
-  if hProcess <> 0 then
-    try
-      if GetModuleFileNameEx(hProcess, 0, path, MAX_PATH) = 0 then
-        RaiseLastOSError;
-      result := path;
-    finally
-      CloseHandle(hProcess)
-    end
+  try
+    hProcess := OpenProcess(PROCESS_QUERY_INFORMATION or PROCESS_VM_READ, false, PID);
+    if hProcess <> 0 then
+      try
+        if GetModuleFileNameEx(hProcess, 0, path, MAX_PATH) = 0 then
+          RaiseLastOSError;
+        result := path;
+      finally
+        CloseHandle(hProcess)
+      end
+  except
+  On E : EOSError do
+    exit;
+  end;
   //else
   //  RaiseLastOSError;
 end;
